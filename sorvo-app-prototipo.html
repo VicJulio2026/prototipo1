@@ -1,0 +1,866 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sorvo App · Copas Riedel</title>
+<style>
+/* =========================================================
+   TOKENS — Sorvo DS (Figma 015-002-APP-DS · colección «Tokens»)
+   Nombres = ruta del token en el DS, en kebab-case.
+   ========================================================= */
+:root{
+  /* Color / Primary */
+  --color-primary-50:#f1e6e9; --color-primary-100:#d5b0bc; --color-primary-200:#c08a9c; --color-primary-300:#a4546e;
+  --color-primary-400:#923352; --color-primary-500:#770027; --color-primary-600:#6c0023; --color-primary-700:#54001c;
+  --color-primary-800:#410015; --color-primary-900:#320010;
+  /* Color / Secondary */
+  --color-secondary-50:#faf8f2; --color-secondary-100:#efead6; --color-secondary-200:#e8dfc3; --color-secondary-300:#ddd1a7;
+  --color-secondary-400:#d6c896; --color-secondary-500:#ccba7c; --color-secondary-600:#baa971; --color-secondary-700:#918458;
+  --color-secondary-800:#706644; --color-secondary-900:#564e34;
+  /* Color / Neutral */
+  --color-neutral-50:#f4f4f4; --color-neutral-100:#eff1f3; --color-neutral-200:#e1e2e3; --color-neutral-300:#9ca3af;
+  --color-neutral-400:#7b7b7b; --color-neutral-500:#7a7a7a; --color-neutral-600:#323232; --color-neutral-700:#1e1e1e;
+  --color-neutral-800:#121212; --color-neutral-900:#000000;
+  /* Color / Sucess (nombre tal cual en el DS) · Error · Warning · Info */
+  --color-sucess-50:#e6f6e8; --color-sucess-700:#007814;
+  --color-error-50:#ffeded; --color-error-600:#bf3a3b; --color-error-700:#992e2f;
+  --color-warning-50:#fff9ea; --color-warning-500:#ffbe2e; --color-warning-800:#8c6919;
+  --color-info-50:#e6f8fc; --color-info-800:#00687d;
+  /* Spacing / Vertical Padding */
+  --spacing-xxs:2px; --spacing-xs:4px; --spacing-s:8px; --spacing-m:12px; --spacing-l:16px; --spacing-xl:24px; --spacing-xxl:32px;
+  /* Spacing / Gap */
+  --gap-xxs:2px; --gap-xs:4px; --gap-s:8px; --gap-m:12px; --gap-l:16px; --gap-xl:24px; --gap-xxl:32px;
+  /* Border radius */
+  --border-radius-xxs:2px; --border-radius-xs:4px; --border-radius-s:8px; --border-radius-m:12px; --border-radius-l:16px; --border-radius-xl:24px; --border-radius-xxl:32px;
+  /* Shadows (effect styles) */
+  --shadow-xs:0 1px 2px rgba(51,51,51,.15); --shadow-s:0 2px 4px rgba(51,51,51,.15); --shadow-m:0 4px 6px rgba(51,51,51,.10);
+  --shadow-l:0 6px 10px 1px rgba(51,51,51,.10); --shadow-xl:0 8px 16px 2px rgba(51,51,51,.10); --shadow-xxl:0 12px 24px 3px rgba(51,51,51,.10);
+  --focus-ring:0 0 0 2px #f5f5f5, 0 0 0 4px var(--color-primary-700);
+  /* Typography (Header 1 / … text styles · Poppins · line-height 120%) */
+  --font-family-base:"Poppins", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-size-header-1:32px; --font-size-header-2:28px; --font-size-subheader-1:24px; --font-size-subheader-2:22px;
+  --font-size-body-1:18px; --font-size-body-2:16px; --font-size-body-3:14px; --font-size-caption:12px;
+  --line-height-base:1.2;
+  --font-weight-regular:400; --font-weight-medium:500; --font-weight-semibold:600; --font-weight-bold:700;
+}
+
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:var(--font-family-base);font-size:var(--font-size-body-3);line-height:var(--line-height-base);color:var(--color-neutral-700);background:var(--color-neutral-100)}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer}
+[hidden]{display:none !important}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+:focus-visible{outline:2px solid var(--color-primary-700);outline-offset:2px}
+.on-dark :focus-visible{outline-color:var(--color-secondary-300)}
+
+/* ---------- Página ---------- */
+.page-top{display:flex;flex-wrap:wrap;align-items:center;gap:var(--gap-l);padding:var(--spacing-m) var(--spacing-xl);background:var(--color-primary-500);color:#fff}
+.page-top h1{font-size:var(--font-size-body-1);font-weight:var(--font-weight-semibold);margin:0;flex:1 1 280px}
+.page-top h1 span{display:block;font-size:var(--font-size-caption);font-weight:var(--font-weight-regular);color:var(--color-secondary-200)}
+.layout{display:grid;grid-template-columns:auto minmax(0,1fr);gap:var(--gap-xl);padding:var(--spacing-xl);align-items:start}
+@media (max-width:1000px){.layout{grid-template-columns:1fr}}
+
+.controls{display:flex;flex-direction:column;gap:var(--gap-m);margin-bottom:var(--spacing-l)}
+.ctrl-group{display:flex;flex-wrap:wrap;align-items:center;gap:var(--gap-xs)}
+.ctrl-group > span{font-weight:var(--font-weight-semibold);margin-right:var(--spacing-xs);min-width:56px}
+.seg{min-height:44px;padding:0 var(--spacing-m);border:1px solid var(--color-neutral-400);background:#fff;border-radius:var(--border-radius-xxl);font-size:var(--font-size-caption);font-weight:var(--font-weight-medium)}
+.seg[aria-pressed="true"]{background:var(--color-primary-500);border-color:var(--color-primary-500);color:#fff}
+.screen-jump{display:flex;flex-wrap:wrap;gap:var(--gap-xs)}
+.screen-jump button{min-height:44px;min-width:44px;padding:0 var(--spacing-s);border:1px solid var(--color-neutral-200);background:#fff;border-radius:var(--border-radius-s);font-size:var(--font-size-caption)}
+.screen-jump button[aria-current="true"]{border-color:var(--color-primary-500);color:var(--color-primary-500);font-weight:var(--font-weight-semibold)}
+
+/* ---------- Dispositivo ---------- */
+.device-col{position:sticky;top:var(--spacing-l)}
+.device{width:375px;height:812px;background:#fff;border-radius:44px;box-shadow:0 0 0 10px var(--color-neutral-800),var(--shadow-xxl);overflow:hidden;display:flex;flex-direction:column;position:relative;container-type:inline-size;container-name:app;margin:10px}
+.device.w430{width:430px;height:932px}
+.statusbar{height:44px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 var(--spacing-xl);font-weight:var(--font-weight-semibold);font-size:var(--font-size-body-3)}
+.statusbar.dark{background:var(--color-primary-500);color:#fff}
+.appbar{flex:none;display:flex;align-items:center;gap:var(--gap-xs);height:56px;padding:0 var(--spacing-s) 0 var(--spacing-l)}
+.appbar.dark{background:var(--color-primary-500);color:#fff}
+.appbar .logo{font-size:var(--font-size-subheader-2);font-weight:var(--font-weight-bold);letter-spacing:.12em;color:var(--color-neutral-900);margin-right:auto}
+.appbar .title{flex:1;font-size:var(--font-size-body-2);font-weight:var(--font-weight-semibold);text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.icon-btn{width:44px;height:44px;flex:none;display:inline-grid;place-items:center;border:0;background:transparent;border-radius:50%;position:relative;color:inherit}
+.icon-btn svg{width:24px;height:24px}
+.badge-count{position:absolute;top:4px;right:2px;min-width:18px;height:18px;padding:0 4px;border-radius:9px;background:var(--color-primary-500);color:#fff;font-size:11px;font-weight:var(--font-weight-semibold);display:grid;place-items:center;line-height:1}
+.appbar.dark .badge-count{background:var(--color-secondary-500);color:var(--color-primary-900)}
+.promobar{flex:none;height:32px;display:flex;align-items:center;justify-content:center;background:var(--color-neutral-600);color:#fff;font-size:var(--font-size-caption);padding:0 var(--spacing-l);text-align:center}
+.viewport{flex:1;overflow-y:auto;overflow-x:hidden;scroll-padding:var(--spacing-l);position:relative;background:#fff}
+.viewport:focus{outline:none}
+.bottomnav{flex:none;display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--color-neutral-200);background:#fff;padding-bottom:34px}
+.bottomnav button{min-height:56px;border:0;background:transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--gap-xxs);font-size:var(--font-size-caption);color:var(--color-neutral-600)}
+.bottomnav button svg{width:24px;height:24px}
+.bottomnav button[aria-current="page"]{color:var(--color-primary-500);font-weight:var(--font-weight-semibold)}
+.home-ind{position:absolute;left:50%;bottom:8px;width:134px;height:5px;margin-left:-67px;border-radius:3px;background:var(--color-neutral-800);pointer-events:none}
+.ctabar{flex:none;display:flex;gap:var(--gap-s);padding:var(--spacing-m) var(--spacing-l) 46px;border-top:1px solid var(--color-neutral-200);background:#fff;box-shadow:var(--shadow-l)}
+.ctabar .btn{flex:1}
+
+/* ---------- Componentes ---------- */
+.btn{min-height:44px;padding:0 var(--spacing-l);border-radius:var(--border-radius-xxl);border:1px solid transparent;font-weight:var(--font-weight-semibold);font-size:var(--font-size-body-3);display:inline-flex;align-items:center;justify-content:center;gap:var(--gap-s)}
+.btn svg{width:20px;height:20px}
+.btn-primary{background:var(--color-primary-500);color:#fff}
+.btn-primary:hover{background:var(--color-primary-600)}
+.btn-secondary{background:#fff;border-color:var(--color-primary-500);color:var(--color-primary-500)}
+.btn-cream{background:var(--color-secondary-500);color:var(--color-primary-900)}
+.btn[disabled],.btn[aria-disabled="true"]{background:var(--color-neutral-200);border-color:var(--color-neutral-200);color:var(--color-neutral-600);cursor:not-allowed}
+.btn-sm{min-height:44px;padding:0 var(--spacing-m);font-size:var(--font-size-caption)}
+.link-btn{min-height:44px;border:0;background:none;color:var(--color-primary-500);font-weight:var(--font-weight-semibold);font-size:var(--font-size-body-3);display:inline-flex;align-items:center;gap:var(--gap-xs);padding:0 var(--spacing-xs)}
+.link-btn svg{width:18px;height:18px}
+.on-dark .link-btn{color:var(--color-secondary-300)}
+
+.section{padding:var(--spacing-xl) var(--spacing-l) 0}
+.sec-head{display:flex;align-items:center;justify-content:space-between;gap:var(--gap-s);margin-bottom:var(--spacing-m)}
+.sec-title{margin:0;font-size:var(--font-size-subheader-2);font-weight:var(--font-weight-medium);color:var(--color-primary-500)}
+.sec-title::after{content:"";display:block;width:48px;height:3px;margin-top:var(--spacing-s);background:var(--color-secondary-200);border-radius:var(--border-radius-xxs)}
+.on-dark .sec-title{color:#fff}
+.sec-sub{margin:calc(var(--spacing-xs) * -1) 0 var(--spacing-m);color:var(--color-neutral-600)}
+
+.chip-row{display:flex;gap:var(--gap-s);overflow-x:auto;padding:var(--spacing-xs) var(--spacing-l);margin:0 calc(var(--spacing-l) * -1);scrollbar-width:none}
+.chip-row::-webkit-scrollbar{display:none}
+.chip{flex:none;min-height:44px;padding:0 var(--spacing-l);border-radius:var(--border-radius-xxl);border:1px solid var(--color-neutral-400);background:#fff;font-size:var(--font-size-caption);font-weight:var(--font-weight-medium);display:inline-flex;align-items:center;gap:var(--gap-xs)}
+.chip svg{width:16px;height:16px}
+.chip[aria-pressed="true"],.chip[aria-checked="true"]{background:var(--color-primary-500);border-color:var(--color-primary-500);color:#fff}
+
+.tag{display:inline-flex;align-items:center;gap:var(--gap-xs);height:24px;padding:0 var(--spacing-s);border-radius:var(--border-radius-xs);font-size:var(--font-size-caption);font-weight:var(--font-weight-semibold);white-space:nowrap}
+.tag svg{width:14px;height:14px}
+.tag-copa{background:var(--color-secondary-100);color:var(--color-primary-700);border:1px solid var(--color-secondary-700);border-radius:var(--border-radius-xxl)}
+.tag-vino{background:var(--color-primary-50);color:var(--color-primary-700);border:1px solid var(--color-primary-500);border-radius:var(--border-radius-xxs)}
+.tag-cepa{background:var(--color-primary-50);color:var(--color-primary-700)}
+.tag-out{background:var(--color-error-50);color:var(--color-error-700)}
+.tag-offer{background:var(--color-primary-500);color:#fff}
+
+.price{font-size:var(--font-size-body-2);font-weight:var(--font-weight-semibold);color:var(--color-primary-500)}
+.price-old{font-size:var(--font-size-caption);color:var(--color-neutral-600);text-decoration:line-through}
+.iva{font-size:var(--font-size-caption);color:var(--color-neutral-600)}
+.socios{display:inline-block;margin-top:var(--spacing-xs);padding:var(--spacing-xs) var(--spacing-s);background:var(--color-secondary-100);border-radius:var(--border-radius-xs);font-size:var(--font-size-caption);font-weight:var(--font-weight-semibold);color:var(--color-neutral-700)}
+
+/* Tarjeta de copa (forma: esquinas muy redondeadas + insignia con copa) */
+.hscroll{display:flex;gap:var(--gap-m);overflow-x:auto;scroll-snap-type:x mandatory;padding:var(--spacing-xs) var(--spacing-l) var(--spacing-s);margin:0 calc(var(--spacing-l) * -1);scrollbar-width:thin}
+.pcard{flex:none;width:156px;scroll-snap-align:start;border:1px solid var(--color-neutral-200);border-radius:var(--border-radius-l);background:#fff;box-shadow:var(--shadow-xs);display:flex;flex-direction:column;overflow:hidden}
+.pcard.copa .pimg{background:var(--color-secondary-50);border-radius:var(--border-radius-l) var(--border-radius-l) 50% 50% / var(--border-radius-l) var(--border-radius-l) 12% 12%}
+.pcard.vino{border-radius:var(--border-radius-xs)}
+.pcard.vino .pimg{background:var(--color-primary-50)}
+.pimg{height:120px;display:grid;place-items:center;position:relative;border:0;width:100%;padding:0}
+.pimg svg.glass{height:100px;width:auto}
+.pimg svg.bottle{height:104px;width:auto}
+.pimg .tag{position:absolute;top:var(--spacing-s);left:var(--spacing-s)}
+.pbody{padding:var(--spacing-s) var(--spacing-m) var(--spacing-m);display:flex;flex-direction:column;gap:var(--gap-xs);flex:1}
+.pbrand{font-size:var(--font-size-caption);color:var(--color-neutral-600);letter-spacing:.06em}
+.pname{font-size:var(--font-size-body-3);font-weight:var(--font-weight-semibold);color:var(--color-primary-500);margin:0;background:none;border:0;padding:0;text-align:left;min-height:44px;display:flex;align-items:center}
+.pfor{font-size:var(--font-size-caption);color:var(--color-neutral-700)}
+.pcard .btn{margin-top:auto;width:100%}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:var(--gap-m)}
+.grid2 .pcard{width:auto}
+@container app (min-width:430px){ .grid2{gap:var(--gap-l)} .pcard{width:176px} .pimg{height:140px} }
+
+/* Banner */
+.hero{margin:var(--spacing-l) var(--spacing-l) 0;position:relative}
+.slides{display:flex;overflow:hidden;border-radius:var(--border-radius-m)}
+.slide{flex:none;width:100%;height:176px;position:relative;display:flex;align-items:center;padding:var(--spacing-l);gap:var(--gap-s);transition:transform .3s}
+@media (prefers-reduced-motion:reduce){.slide{transition:none}}
+.slide-copas{background:linear-gradient(120deg,var(--color-primary-800),var(--color-primary-500))}
+.slide-new{background:linear-gradient(120deg,var(--color-neutral-700),var(--color-secondary-800))}
+.slide .copy{flex:0 0 66%;display:flex;flex-direction:column;gap:var(--gap-s);z-index:1}
+.slide .art{position:absolute;right:var(--spacing-m);bottom:var(--spacing-m)}
+.slide .eyebrow{font-size:var(--font-size-caption);color:var(--color-secondary-300);font-weight:var(--font-weight-semibold);letter-spacing:.08em;text-transform:uppercase}
+.slide h2{margin:0;color:#fff;font-size:var(--font-size-subheader-2);font-weight:var(--font-weight-semibold)}
+.slide p{margin:0;color:var(--color-secondary-50);font-size:var(--font-size-caption)}
+.slide .btn{align-self:flex-start}
+.slide .art{display:flex;align-items:flex-end;gap:var(--gap-xs)}
+.slide .art svg{height:84px;width:auto}
+@container app (min-width:430px){ .slide{height:196px} .slide .art svg{height:104px} }
+.dots{display:flex;justify-content:center;gap:0}
+.dots button{width:44px;height:44px;border:0;background:none;display:grid;place-items:center}
+.dots button span{width:8px;height:8px;border-radius:4px;background:var(--color-neutral-400);transition:width .2s}
+.dots button[aria-current="true"] span{width:24px;background:var(--color-primary-500)}
+
+/* Accesos rápidos */
+.quick{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--gap-s)}
+.qa{min-height:76px;border:1px solid var(--color-primary-50);background:var(--color-primary-50);border-radius:var(--border-radius-m);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--gap-xs);padding:var(--spacing-s) var(--spacing-xs);font-size:var(--font-size-caption);font-weight:var(--font-weight-medium);color:var(--color-primary-700);text-align:center;line-height:1.15}
+.qa svg{width:24px;height:24px;color:var(--color-primary-500)}
+.qa.hl{background:var(--color-primary-500);border-color:var(--color-primary-500);color:#fff}
+.qa.hl svg{color:var(--color-secondary-300)}
+@container app (min-width:430px){ .qa{min-height:84px} }
+
+/* Bloques de home */
+.club{margin:var(--spacing-xl) 0 0;background:var(--color-primary-500);padding:var(--spacing-l)}
+.club-card{display:flex;align-items:center;gap:var(--gap-m);border-radius:var(--border-radius-m);padding:var(--spacing-l);background:linear-gradient(120deg,var(--color-primary-700),var(--color-primary-400));color:#fff;min-height:116px}
+.club-card p{margin:0;font-size:var(--font-size-body-2);flex:1}
+.club-card b{font-weight:var(--font-weight-bold)}
+.regions{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--gap-s)}
+.region{min-height:64px;border:1px solid var(--color-neutral-200);border-radius:var(--border-radius-m);background:#fff;display:flex;align-items:center;justify-content:center;gap:var(--gap-s);font-weight:var(--font-weight-medium);font-size:var(--font-size-body-3)}
+.flag{width:28px;height:20px;border-radius:var(--border-radius-xxs);flex:none}
+.exclusive{margin-top:var(--spacing-xl);background:var(--color-primary-500);padding:var(--spacing-xl) var(--spacing-l)}
+.exclusive p{color:#fff;margin:0 0 var(--spacing-m)}
+.media-card{border:0;border-radius:var(--border-radius-m);min-height:104px;padding:var(--spacing-m);display:flex;flex-direction:column;justify-content:space-between;align-items:flex-start;color:#fff;text-align:left;font-weight:var(--font-weight-bold);letter-spacing:.04em;background:linear-gradient(160deg,var(--color-neutral-600),var(--color-primary-800))}
+.media-card .btn{min-height:44px}
+.news{display:flex;gap:var(--gap-m);overflow-x:auto;padding-bottom:var(--spacing-s);margin:0 calc(var(--spacing-l) * -1);padding-left:var(--spacing-l);padding-right:var(--spacing-l)}
+.news article{flex:none;width:220px;display:flex;gap:var(--gap-s);align-items:flex-start}
+.news .ph{width:72px;height:72px;flex:none;border-radius:var(--border-radius-s);background:var(--color-neutral-200)}
+.news h3{margin:var(--spacing-xxs) 0;font-size:var(--font-size-body-3);font-weight:var(--font-weight-semibold)}
+.news small{color:var(--color-primary-500);font-size:var(--font-size-caption)}
+.foot-space{height:var(--spacing-xl)}
+
+/* Imágenes como bloque con texto alternativo */
+.photo{display:grid;place-items:center;color:var(--color-neutral-600);font-size:var(--font-size-caption);text-align:center;padding:var(--spacing-s)}
+
+/* Listas y filas */
+.list{list-style:none;margin:0;padding:0}
+.row{display:flex;align-items:center;gap:var(--gap-m);width:100%;min-height:64px;padding:var(--spacing-s) var(--spacing-l);border:0;border-bottom:1px solid var(--color-neutral-200);background:#fff;text-align:left}
+.row svg.glass{height:48px;width:32px;flex:none}
+.row .rtext{flex:1;display:flex;flex-direction:column;gap:var(--gap-xxs)}
+.row .rtext b{font-size:var(--font-size-body-3);font-weight:var(--font-weight-semibold);color:var(--color-neutral-800)}
+.row .rtext span{font-size:var(--font-size-caption);color:var(--color-neutral-600)}
+.row > svg:last-child{width:20px;height:20px;color:var(--color-primary-500);flex:none}
+.group-label{padding:var(--spacing-l) var(--spacing-l) var(--spacing-xs);margin:0;font-size:var(--font-size-caption);font-weight:var(--font-weight-semibold);color:var(--color-primary-500);text-transform:uppercase;letter-spacing:.06em;display:flex;align-items:center;gap:var(--gap-s)}
+.group-label svg{width:16px;height:16px}
+
+/* Encabezado vino (Guía) */
+.guide-hero{background:var(--color-primary-500);color:#fff;padding:0 var(--spacing-l) var(--spacing-l);border-radius:0 0 var(--border-radius-l) var(--border-radius-l)}
+.guide-hero h1{margin:0 0 var(--spacing-xs);font-size:var(--font-size-subheader-2);font-weight:var(--font-weight-semibold);border-top:1px solid var(--color-primary-300);padding-top:var(--spacing-m)}
+.guide-hero p{margin:0 0 var(--spacing-m);font-size:var(--font-size-caption);color:var(--color-secondary-50)}
+.fake-search{width:100%;min-height:44px;display:flex;align-items:center;gap:var(--gap-s);padding:0 var(--spacing-m);border-radius:var(--border-radius-s);border:1px solid var(--color-neutral-400);background:#fff;color:var(--color-neutral-600);text-align:left}
+.fake-search svg{width:20px;height:20px}
+
+/* Ficha */
+.pdp-img{height:248px;display:grid;place-items:center;background:var(--color-secondary-50);position:relative}
+.pdp-img svg.glass{height:200px;width:auto}
+.pdp-img svg.bottle{height:210px;width:auto}
+.pdp-img.vino{background:var(--color-primary-50)}
+.pdp-img .tags{position:absolute;top:var(--spacing-m);left:var(--spacing-l);display:flex;gap:var(--gap-xs)}
+.pdp{padding:var(--spacing-l)}
+.pdp h1{margin:var(--spacing-xs) 0;font-size:var(--font-size-subheader-2);font-weight:var(--font-weight-semibold);color:var(--color-neutral-800)}
+.pdp .meta{color:var(--color-neutral-600);font-size:var(--font-size-caption)}
+.pdp h2{font-size:var(--font-size-body-2);font-weight:var(--font-weight-semibold);margin:var(--spacing-xl) 0 var(--spacing-s);color:var(--color-neutral-800)}
+.pdp p{margin:0;font-size:var(--font-size-body-3);line-height:1.5}
+.why{background:var(--color-secondary-50);border-left:3px solid var(--color-secondary-500);border-radius:var(--border-radius-s);padding:var(--spacing-m)}
+.stepper{display:inline-flex;align-items:center;border:1px solid var(--color-neutral-400);border-radius:var(--border-radius-xxl)}
+.stepper button{width:44px;height:44px;border:0;background:none;display:grid;place-items:center;border-radius:50%}
+.stepper button svg{width:20px;height:20px}
+.stepper input{width:48px;height:44px;border:0;text-align:center;font-weight:var(--font-weight-semibold);background:transparent;-moz-appearance:textfield}
+.stepper input::-webkit-inner-spin-button{-webkit-appearance:none}
+.stepper.invalid{border-color:var(--color-error-600)}
+.field-msg{margin-top:var(--spacing-xs);font-size:var(--font-size-caption);color:var(--color-neutral-600);display:flex;gap:var(--gap-xs);align-items:flex-start}
+.field-msg.err{color:var(--color-error-700)}
+.field-msg svg{width:16px;height:16px;flex:none}
+.reco{display:flex;gap:var(--gap-m);align-items:center;border:1px solid var(--color-secondary-500);border-radius:var(--border-radius-l);padding:var(--spacing-m);background:var(--color-secondary-50)}
+.reco svg.glass{height:84px;width:auto;flex:none}
+.reco .rtext{flex:1;display:flex;flex-direction:column;gap:var(--gap-xs)}
+.reco .actions{display:flex;gap:var(--gap-s);flex-wrap:wrap;margin-top:var(--spacing-xs)}
+.alert{display:flex;gap:var(--gap-s);padding:var(--spacing-m);border-radius:var(--border-radius-s);font-size:var(--font-size-caption);line-height:1.4}
+.alert svg{width:20px;height:20px;flex:none}
+.alert-error{background:var(--color-error-50);color:var(--color-error-700)}
+.alert-warn{background:var(--color-warning-50);color:var(--color-warning-800)}
+.alert-info{background:var(--color-info-50);color:var(--color-info-800)}
+
+/* Buscador */
+.searchbar{flex:1;display:flex;align-items:center;gap:var(--gap-xs);min-height:44px;padding:0 var(--spacing-xs) 0 var(--spacing-m);border:1px solid var(--color-neutral-400);border-radius:var(--border-radius-s);background:#fff;color:var(--color-neutral-700)}
+.searchbar svg{width:20px;height:20px;flex:none}
+.searchbar input{flex:1;min-width:0;height:44px;border:0;background:transparent;font-size:var(--font-size-body-2)}
+.searchbar input:focus{outline:none}
+.searchbar:focus-within{outline:2px solid var(--color-secondary-300);outline-offset:2px}
+.searchbar .icon-btn{width:44px;height:44px}
+.appbar .cancel{min-height:44px;border:0;background:none;color:#fff;font-size:var(--font-size-caption);font-weight:var(--font-weight-medium);padding:0 var(--spacing-xs)}
+.sugg{display:flex;align-items:center;gap:var(--gap-m);width:100%;min-height:56px;padding:var(--spacing-s) var(--spacing-l);border:0;background:#fff;text-align:left;border-bottom:1px solid var(--color-neutral-100)}
+.sugg .thumb{width:40px;height:48px;flex:none;display:grid;place-items:center;border-radius:var(--border-radius-s)}
+.sugg .thumb.copa{background:var(--color-secondary-50);border-radius:50% 50% var(--border-radius-s) var(--border-radius-s)}
+.sugg .thumb.vino{background:var(--color-primary-50);border-radius:var(--border-radius-xxs)}
+.sugg .thumb svg{height:40px;width:auto}
+.sugg .thumb > svg:not(.glass):not(.bottle){height:20px;width:20px;color:var(--color-primary-500)}
+.sugg .thumb.cepa{background:var(--color-neutral-100);border-radius:50%;height:40px}
+.appbar .searchbar{min-width:0}
+.sugg .rtext{flex:1;display:flex;flex-direction:column;gap:var(--gap-xxs);min-width:0}
+.sugg .rtext b{font-weight:var(--font-weight-medium);font-size:var(--font-size-body-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sugg mark{background:none;color:var(--color-primary-500);font-weight:var(--font-weight-bold)}
+.sugg .rtext span{font-size:var(--font-size-caption);color:var(--color-neutral-600)}
+.filters{position:sticky;top:0;z-index:2;background:#fff;padding:var(--spacing-s) var(--spacing-l) var(--spacing-s);border-bottom:1px solid var(--color-neutral-200)}
+.filters .flabel{font-size:var(--font-size-caption);font-weight:var(--font-weight-semibold);margin:var(--spacing-xs) 0;color:var(--color-neutral-700)}
+.segmented{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--color-primary-500);border-radius:var(--border-radius-xxl);overflow:hidden}
+.segmented button{min-height:44px;border:0;background:#fff;font-size:var(--font-size-caption);font-weight:var(--font-weight-medium);color:var(--color-primary-500);display:flex;align-items:center;justify-content:center;gap:var(--gap-xs)}
+.segmented button svg{width:16px;height:16px}
+.segmented button[aria-checked="true"]{background:var(--color-primary-500);color:#fff}
+.result-count{padding:var(--spacing-m) var(--spacing-l) 0;font-size:var(--font-size-caption);color:var(--color-neutral-600)}
+
+/* Estados */
+.sk{background:linear-gradient(90deg,var(--color-neutral-100),var(--color-neutral-50),var(--color-neutral-100));background-size:200% 100%;animation:sk 1.2s infinite linear;border-radius:var(--border-radius-s)}
+@keyframes sk{to{background-position:-200% 0}}
+@media (prefers-reduced-motion:reduce){.sk{animation:none}}
+.state-box{margin:var(--spacing-l);padding:var(--spacing-xl) var(--spacing-l);border-radius:var(--border-radius-m);text-align:center;display:flex;flex-direction:column;align-items:center;gap:var(--gap-m)}
+.state-box h1,.state-box h2,.state-box h3{margin:0;font-size:var(--font-size-body-2);font-weight:var(--font-weight-semibold);color:var(--color-neutral-800)}
+.state-box p{margin:0;font-size:var(--font-size-body-3);line-height:1.4;color:var(--color-neutral-600)}
+.state-box .ico{width:56px;height:56px;border-radius:50%;display:grid;place-items:center}
+.state-box .ico svg{width:28px;height:28px}
+.state-error{background:var(--color-error-50)}
+.state-error .ico{background:#fff;color:var(--color-error-600)}
+.state-empty{background:var(--color-secondary-50)}
+.state-empty .ico{background:#fff;color:var(--color-primary-500)}
+.state-box .actions{display:flex;gap:var(--gap-s);flex-wrap:wrap;justify-content:center}
+
+.toast{position:absolute;left:var(--spacing-l);right:var(--spacing-l);bottom:110px;z-index:10;background:var(--color-neutral-700);color:#fff;border-radius:var(--border-radius-s);padding:var(--spacing-m) var(--spacing-l);display:flex;align-items:center;gap:var(--gap-s);box-shadow:var(--shadow-xl);opacity:0;transform:translateY(8px);transition:opacity .2s,transform .2s;pointer-events:none}
+.toast.show{opacity:1;transform:none;pointer-events:auto}
+.toast svg{width:20px;height:20px;color:var(--color-sucess-50);flex:none}
+.toast span{flex:1}
+.toast .link-btn{color:var(--color-secondary-300);min-height:44px}
+@media (prefers-reduced-motion:reduce){.toast{transition:none}}
+
+.offer-timer{display:flex;align-items:center;gap:var(--gap-s);margin:var(--spacing-l) var(--spacing-l) 0;padding:var(--spacing-m);background:var(--color-primary-50);border-radius:var(--border-radius-m);color:var(--color-primary-700);font-size:var(--font-size-caption)}
+.offer-timer svg{width:20px;height:20px;flex:none}
+.coll{display:flex;align-items:center;gap:var(--gap-m);width:100%;border:1px solid var(--color-neutral-200);border-radius:var(--border-radius-m);padding:var(--spacing-m);background:#fff;text-align:left;margin-bottom:var(--spacing-m)}
+.coll .art{width:88px;height:88px;flex:none;border-radius:var(--border-radius-s);background:var(--color-secondary-50);display:flex;align-items:flex-end;justify-content:center;gap:2px;padding-bottom:var(--spacing-s)}
+.coll .art svg{height:64px;width:auto}
+.coll .rtext{flex:1;display:flex;flex-direction:column;gap:var(--gap-xs)}
+.coll .rtext b{font-size:var(--font-size-body-2);color:var(--color-primary-500);font-weight:var(--font-weight-semibold)}
+.coll .rtext span{font-size:var(--font-size-caption);color:var(--color-neutral-600)}
+.coll > svg{width:20px;height:20px;color:var(--color-primary-500)}
+
+/* ---------- Documentación ---------- */
+.docs{background:#fff;border-radius:var(--border-radius-l);box-shadow:var(--shadow-s);min-width:0}
+.tabs{display:flex;flex-wrap:wrap;gap:var(--gap-xs);padding:var(--spacing-s) var(--spacing-s) 0;border-bottom:1px solid var(--color-neutral-200)}
+.tabs button{min-height:44px;padding:0 var(--spacing-m);border:0;background:none;border-bottom:3px solid transparent;font-weight:var(--font-weight-medium);color:var(--color-neutral-600)}
+.tabs button[aria-selected="true"]{color:var(--color-primary-500);border-bottom-color:var(--color-primary-500);font-weight:var(--font-weight-semibold)}
+.panel{padding:var(--spacing-xl);font-size:var(--font-size-body-3);line-height:1.55;max-height:calc(100vh - 140px);overflow:auto}
+.panel:focus-visible{outline-offset:-4px}
+.panel h2{font-size:var(--font-size-subheader-2);color:var(--color-primary-500);margin:0 0 var(--spacing-m);font-weight:var(--font-weight-semibold)}
+.panel h3{font-size:var(--font-size-body-1);margin:var(--spacing-xl) 0 var(--spacing-s);color:var(--color-neutral-800);font-weight:var(--font-weight-semibold)}
+.panel h4{font-size:var(--font-size-body-2);margin:var(--spacing-l) 0 var(--spacing-xs);font-weight:var(--font-weight-semibold)}
+.panel table{width:100%;border-collapse:collapse;margin:var(--spacing-s) 0 var(--spacing-l);font-size:var(--font-size-caption);line-height:1.45}
+.panel th,.panel td{border:1px solid var(--color-neutral-200);padding:var(--spacing-s);vertical-align:top;text-align:left}
+.panel th{background:var(--color-primary-50);color:var(--color-primary-700);font-weight:var(--font-weight-semibold)}
+.panel .tbl-wrap{overflow-x:auto}
+.panel a{color:var(--color-primary-500);word-break:break-all}
+.panel code{background:var(--color-neutral-100);padding:0 var(--spacing-xs);border-radius:var(--border-radius-xs);font-size:.95em}
+.capture{min-height:72px;min-width:110px;border:1px dashed var(--color-neutral-400);border-radius:var(--border-radius-s);display:grid;place-items:center;color:var(--color-neutral-600);text-align:center;padding:var(--spacing-xs);background:var(--color-neutral-50)}
+.verify{display:inline-block;padding:0 var(--spacing-xs);border-radius:var(--border-radius-xs);background:var(--color-warning-50);color:var(--color-warning-800);font-weight:var(--font-weight-semibold)}
+.ok{color:var(--color-sucess-700);font-weight:var(--font-weight-semibold)}
+.no{color:var(--color-error-700);font-weight:var(--font-weight-semibold)}
+.out-scope{border-left:3px solid var(--color-secondary-500);background:var(--color-secondary-50);padding:var(--spacing-s) var(--spacing-m);border-radius:var(--border-radius-xs);margin:var(--spacing-s) 0}
+.kpi{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:var(--gap-m);margin:var(--spacing-m) 0}
+.kpi div{border:1px solid var(--color-neutral-200);border-radius:var(--border-radius-m);padding:var(--spacing-m)}
+.kpi b{display:block;font-size:var(--font-size-subheader-1);color:var(--color-primary-500)}
+
+/* ---------- Versión independiente: la app ocupa la ventana ---------- */
+html,body{height:100%}
+body{background:var(--color-neutral-100)}
+.device{width:100%;max-width:560px;height:100vh;height:100dvh;margin:0 auto;border-radius:0;box-shadow:none}
+.device.w430{width:100%;height:100dvh}
+.statusbar,.home-ind{display:none}
+.appbar{padding-top:env(safe-area-inset-top,0px);height:calc(56px + env(safe-area-inset-top,0px))}
+.bottomnav{padding-bottom:env(safe-area-inset-bottom,0px)}
+.ctabar{padding-bottom:calc(var(--spacing-m) + env(safe-area-inset-bottom,0px))}
+.toast{bottom:calc(76px + env(safe-area-inset-bottom,0px))}
+@media (min-width:600px){ .device{box-shadow:var(--shadow-xl)} }
+</style>
+</head>
+<body>
+
+
+<div class="device" id="device">
+      <div class="statusbar" id="statusbar" aria-hidden="true"><span>9:41</span><span>●●● ▮</span></div>
+      <div class="appbar" id="appbar"></div>
+      <div class="promobar" id="promobar">Disfruta de nuestra colección exclusiva Sorvo hours</div>
+      <main class="viewport" id="vp" tabindex="-1" aria-live="off"></main>
+      <div class="ctabar" id="ctabar" hidden></div>
+      <nav class="bottomnav" id="bottomnav" aria-label="Navegación principal">
+        <button data-nav="p1"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11l8-7 8 7v9h-5v-6H9v6H4z"/></svg>Inicio</button>
+        <button data-nav="tienda"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9l1.5-5h13L20 9"/><path d="M4 9v11h16V9"/><path d="M4 9a2.7 2.7 0 0 0 5.3 0 2.7 2.7 0 0 0 5.4 0 2.7 2.7 0 0 0 5.3 0"/></svg>Tienda</button>
+        <button data-nav="club"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h10c0 5-1.5 9-5 9S7 8 7 3z"/><path d="M12 12v8M8 21h8"/></svg>Club</button>
+        <button data-nav="perfil"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/></svg>Perfil</button>
+      </nav>
+      <div class="home-ind" aria-hidden="true"></div>
+      <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    </div>
+
+<script>
+/* ================== DATOS (marcadores, sin catálogo inventado) ================== */
+const CEPAS = [
+  {id:'cabernet', name:'Cabernet Sauvignon / Merlot', short:'Cabernet', fam:'Tintos', shape:{bw:40,bh:58,rim:.62}, red:true,
+   why:'Su cáliz alto y amplio da espacio para que se abran los aromas de fruta negra y suaviza la percepción de los taninos.'},
+  {id:'malbec', name:'Malbec', short:'Malbec', fam:'Tintos', shape:{bw:44,bh:54,rim:.58}, red:true, supuesto:true,
+   why:'Pensada para tintos intensos: el cáliz amplio deja respirar al vino y realza su fruta madura y su textura.'},
+  {id:'pinot', name:'Pinot Noir', short:'Pinot Noir', fam:'Tintos', shape:{bw:54,bh:50,rim:.46}, red:true,
+   why:'El cáliz en forma de globo concentra los aromas delicados y resalta la fruta roja y la frescura del Pinot Noir.'},
+  {id:'syrah', name:'Syrah / Shiraz', short:'Syrah', fam:'Tintos', shape:{bw:42,bh:56,rim:.52}, red:true,
+   why:'Su boca algo más cerrada concentra las notas especiadas y equilibra fruta y tanino.'},
+  {id:'chardonnay', name:'Chardonnay', short:'Chardonnay', fam:'Blancos', shape:{bw:46,bh:40,rim:.72}, red:false,
+   why:'Su boca más abierta reparte el vino en el paladar y equilibra la cremosidad del Chardonnay con su acidez.'},
+  {id:'sauvignon', name:'Sauvignon Blanc', short:'Sauvignon Blanc', fam:'Blancos', shape:{bw:34,bh:46,rim:.66}, red:false,
+   why:'Un cáliz más estrecho conserva la frescura y los aromas cítricos y herbales.'},
+  {id:'riesling', name:'Riesling', short:'Riesling', fam:'Blancos', shape:{bw:32,bh:44,rim:.7}, red:false,
+   why:'Concentra los aromas florales y equilibra el dulzor con la acidez.'},
+  {id:'champagne', name:'Champagne y espumantes', short:'Champagne', fam:'Espumantes', shape:{bw:26,bh:58,rim:.84}, red:false, out:true,
+   why:'Su forma alargada cuida la burbuja y, con un cáliz algo más amplio que la flauta clásica, deja expresarse a los aromas.'}
+];
+const C = id => CEPAS.find(c=>c.id===id);
+const COPAS = CEPAS.map(c=>({id:'copa-'+c.id, cepa:c.id, name:`[Modelo Riedel] ${c.short}`, line:'[Línea Riedel]', out:!!c.out}));
+const WINES = CEPAS.flatMap(c=>[1,2].map(n=>({id:`vino-${c.id}-${n}`, cepa:c.id, name:`[Vino ${c.short}] ${n}`, origin:'[Bodega] · [País]'})));
+const ALIASES = {cabernet:['cabernet','merlot','cab'], malbec:['malbec'], pinot:['pinot','noir'], syrah:['syrah','shiraz'],
+  chardonnay:['chardonnay','chardo'], sauvignon:['sauvignon','blanc'], riesling:['riesling'], champagne:['champagne','espumante','espumantes','brut','cava']};
+const MAXQ = 6;
+
+/* ================== ÍCONOS ================== */
+const P = {
+  search:'<circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/>',
+  bell:'<path d="M6 16v-5a6 6 0 1 1 12 0v5l1.5 2h-15z"/><path d="M10 20a2 2 0 0 0 4 0"/>',
+  cart:'<path d="M3 4h2l2.4 11h10.2L20 8H6.2"/><circle cx="9" cy="19" r="1.5"/><circle cx="17" cy="19" r="1.5"/>',
+  back:'<path d="M15 5l-7 7 7 7"/>',
+  glass:'<path d="M7 3h10c0 5-1.5 9-5 9S7 8 7 3z"/><path d="M12 12v8M8 21h8"/>',
+  bottle:'<path d="M10 2h4v5c2 1 3 3 3 5v9a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1v-9c0-2 1-4 3-5z"/>',
+  tag:'<path d="M3 12V4h8l10 10-7 7z"/><circle cx="7.5" cy="8.5" r="1.5"/>',
+  grid:'<rect x="4" y="4" width="7" height="7" rx="1"/><rect x="13" y="4" width="7" height="7" rx="1"/><rect x="4" y="13" width="7" height="7" rx="1"/><rect x="13" y="13" width="7" height="7" rx="1"/>',
+  book:'<path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 21V5M9 7h6"/>',
+  barrel:'<ellipse cx="12" cy="12" rx="7" ry="9"/><path d="M5.5 8h13M5.5 16h13"/>',
+  box:'<path d="M3 7l9-4 9 4v10l-9 4-9-4z"/><path d="M3 7l9 4 9-4M12 11v10"/>',
+  gift:'<rect x="3" y="8" width="18" height="5"/><path d="M5 13v8h14v-8M12 8v13"/><path d="M12 8c-2-4-6-4-6-1.5S9 8 12 8c3 0 6 0 6-1.5S14 4 12 8z"/>',
+  calendar:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
+  acc:'<path d="M8 3v6a4 4 0 0 0 8 0V3"/><path d="M12 13v8M9 21h6"/>',
+  chev:'<path d="M9 5l7 7-7 7"/>',
+  close:'<path d="M6 6l12 12M18 6L6 18"/>',
+  alert:'<circle cx="12" cy="12" r="9"/><path d="M12 7v6M12 16.5v.5"/>',
+  check:'<path d="M5 12l5 5 9-10"/>',
+  minus:'<path d="M5 12h14"/>', plus:'<path d="M12 5v14M5 12h14"/>',
+  clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  refresh:'<path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/>'
+};
+const ic = (n,cls='') => `<svg class="${cls}" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${P[n]}</svg>`;
+
+/* Silueta de copa por cepa */
+function glassSVG(cepaId, opts={}){
+  const c = C(cepaId), s = c.shape, cx=30, top=6, bh=s.bh, bw=s.bw, rim=bw*s.rim/2, bot=top+bh;
+  const fill = c.red ? 'var(--color-primary-400)' : 'var(--color-secondary-400)';
+  const lvl = top + bh*0.62;
+  const label = opts.alt ? `role="img" aria-label="${opts.alt}"` : 'aria-hidden="true"';
+  return `<svg class="glass" ${label} viewBox="0 0 60 106" xmlns="http://www.w3.org/2000/svg">
+    <defs><clipPath id="cl-${cepaId}-${opts.k||0}"><path d="M${cx-rim},${top} C${cx-bw/2},${top+bh*.35} ${cx-bw/2},${top+bh*.78} ${cx},${bot} C${cx+bw/2},${top+bh*.78} ${cx+bw/2},${top+bh*.35} ${cx+rim},${top} Z"/></clipPath></defs>
+    <rect x="0" y="${lvl}" width="60" height="${bh}" fill="${fill}" clip-path="url(#cl-${cepaId}-${opts.k||0})"/>
+    <path d="M${cx-rim},${top} C${cx-bw/2},${top+bh*.35} ${cx-bw/2},${top+bh*.78} ${cx},${bot} C${cx+bw/2},${top+bh*.78} ${cx+bw/2},${top+bh*.35} ${cx+rim},${top}" fill="none" stroke="var(--color-primary-700)" stroke-width="1.6"/>
+    <path d="M${cx},${bot} V98" stroke="var(--color-primary-700)" stroke-width="1.6"/>
+    <ellipse cx="${cx}" cy="99" rx="13" ry="2.6" fill="none" stroke="var(--color-primary-700)" stroke-width="1.6"/>
+  </svg>`;
+}
+function bottleSVG(cepaId, alt){
+  const red = C(cepaId).red;
+  const label = alt ? `role="img" aria-label="${alt}"` : 'aria-hidden="true"';
+  return `<svg class="bottle" ${label} viewBox="0 0 40 110"><path d="M16 4h8v22c6 4 9 9 9 16v60a4 4 0 0 1-4 4H11a4 4 0 0 1-4-4V42c0-7 3-12 9-16z" fill="${red?'var(--color-primary-700)':'var(--color-secondary-600)'}"/><rect x="9" y="58" width="22" height="26" rx="2" fill="var(--color-secondary-50)"/><path d="M16 4h8v6h-8z" fill="var(--color-neutral-700)"/></svg>`;
+}
+
+/* ================== ESTADO ================== */
+const S = { screen:'p1', params:{}, stack:[], ui:'normal', cart:0, width:375, homeCepa:'malbec', slide:0, q:'', toastT:null };
+const vp = document.getElementById('vp');
+const SCREENS = {
+  p1:{label:'P1 Home'}, p2:{label:'P2 Guía'}, p3:{label:'P3 Colecciones'}, p4:{label:'P4 Ofertas'},
+  p5:{label:'P5 Ficha copa'}, p6:{label:'P6 Ficha vino'}, p7:{label:'P7 Buscador'}, p8:{label:'P8 Resultados'}, p9:{label:'P9 Sin resultados'}
+};
+
+/* ================== HELPERS DE UI ================== */
+const esc = s => String(s).replace(/[&<>"]/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+const tagCopa = () => `<span class="tag tag-copa">${ic('glass')}Copa Riedel</span>`;
+const tagVino = () => `<span class="tag tag-vino">${ic('bottle')}Vino</span>`;
+function copaCard(copa, k=0){
+  const c = C(copa.cepa); const out = copa.out || (S.ui==='sinstock' && copa.cepa===S.homeCepa);
+  return `<article class="pcard copa" aria-label="Copa ${esc(copa.name)}">
+    <button class="pimg" data-go="p5" data-cepa="${c.id}" tabindex="-1" aria-hidden="true">${glassSVG(c.id,{k})}${out?'<span class="tag tag-out">Agotada</span>':tagCopa()}</button>
+    <div class="pbody">
+      <span class="pbrand">RIEDEL</span>
+      <button class="pname" data-go="p5" data-cepa="${c.id}">${esc(copa.name)}</button>
+      <span class="pfor">Para ${esc(c.name)}</span>
+      <span class="price">[Precio USD]</span>
+      ${out ? `<button class="btn btn-sm" disabled>Agotada</button>` : `<button class="btn btn-primary btn-sm" data-add="${copa.id}" aria-label="Agregar ${esc(copa.name)} al carrito">Agregar</button>`}
+    </div></article>`;
+}
+function wineCard(w){
+  return `<article class="pcard vino" aria-label="Vino ${esc(w.name)}">
+    <button class="pimg" data-go="p6" data-wine="${w.id}" tabindex="-1" aria-hidden="true">${bottleSVG(w.cepa)}${tagVino()}</button>
+    <div class="pbody">
+      <span class="pbrand">[BODEGA]</span>
+      <button class="pname" data-go="p6" data-wine="${w.id}">${esc(w.name)}</button>
+      <span class="pfor">${esc(C(w.cepa).name)}</span>
+      <span class="price">[Precio USD]</span>
+      <button class="btn btn-secondary btn-sm" data-add="${w.id}" aria-label="Agregar ${esc(w.name)} al carrito">Agregar</button>
+    </div></article>`;
+}
+function skCards(n=2){ return `<div class="hscroll" aria-busy="true" aria-label="Cargando copas">${Array.from({length:n},()=>`<div class="pcard" aria-hidden="true"><div class="sk" style="height:120px;border-radius:0"></div><div class="pbody"><div class="sk" style="height:12px;width:60%"></div><div class="sk" style="height:16px"></div><div class="sk" style="height:12px;width:70%"></div><div class="sk" style="height:44px;border-radius:var(--border-radius-xxl)"></div></div></div>`).join('')}</div>`; }
+function skRows(n=5){ return `<div aria-busy="true"><span class="sr-only">Cargando…</span>${Array.from({length:n},()=>`<div class="row" aria-hidden="true"><div class="sk" style="width:32px;height:48px"></div><div class="rtext"><div class="sk" style="height:14px;width:60%"></div><div class="sk" style="height:12px;width:40%"></div></div></div>`).join('')}</div>`; }
+function errBox(what, how='Revisa tu conexión e inténtalo de nuevo.'){
+  return `<div class="state-box state-error" role="alert"><div class="ico">${ic('alert')}</div><h3>No pudimos cargar ${what}</h3><p>${how}</p><button class="btn btn-primary" data-retry>${ic('refresh')}Reintentar</button></div>`;
+}
+function emptyBox(title, text, actions){
+  return `<div class="state-box state-empty"><div class="ico">${ic('glass')}</div><h3>${title}</h3><p>${text}</p><div class="actions">${actions}</div></div>`;
+}
+
+/* ================== APP BAR ================== */
+function cartBtn(){ return `<button class="icon-btn" data-go="cart" aria-label="Carrito, ${S.cart} ${S.cart===1?'producto':'productos'}">${ic('cart')}${S.cart?`<span class="badge-count" aria-hidden="true">${S.cart}</span>`:''}</button>`; }
+function appbar(kind, title){
+  const ab = document.getElementById('appbar'), sb = document.getElementById('statusbar');
+  ab.className = 'appbar' + (kind==='home'?'':' dark'); sb.className = 'statusbar' + (kind==='home'?'':' dark');
+  if(kind==='home'){
+    ab.innerHTML = `<span class="logo" role="img" aria-label="Sorvo">SORVO</span>
+      <button class="icon-btn" data-go="p7" aria-label="Buscar vinos y copas">${ic('search')}</button>
+      <button class="icon-btn" aria-label="Notificaciones">${ic('bell')}</button>${cartBtn()}`;
+  } else if(kind==='search'){
+    ab.innerHTML = `<button class="icon-btn" data-back aria-label="Volver">${ic('back')}</button>
+      <form class="searchbar" role="search" id="sform" onsubmit="return false">
+        ${ic('search')}<label for="q" class="sr-only">Buscar vinos y copas</label>
+        <input id="q" type="search" autocomplete="off" placeholder="Ej. Pinot Noir, Malbec…" value="${esc(S.q)}" aria-describedby="q-help" aria-controls="vp">
+        ${S.q?`<button type="button" class="icon-btn" data-clear aria-label="Borrar búsqueda">${ic('close')}</button>`:''}
+      </form>
+      <button class="cancel" data-go="p1">Cancelar</button>`;
+    const q = document.getElementById('q');
+    q.addEventListener('input', e=>{ S.q=e.target.value; renderSuggestions(); const has=!!S.q; if(has!==!!ab.querySelector('[data-clear]')){ const pos=q.selectionStart; appbar('search'); const nq=document.getElementById('q'); nq.focus(); nq.setSelectionRange(pos,pos);} });
+    q.addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); submitSearch(); } });
+  } else {
+    ab.innerHTML = `<button class="icon-btn" data-back aria-label="Volver">${ic('back')}</button><span class="title">${title}</span>
+      <button class="icon-btn" data-go="p7" aria-label="Buscar vinos y copas">${ic('search')}</button>${cartBtn()}`;
+  }
+}
+
+/* ================== PANTALLAS ================== */
+function sectionCopasHome(){
+  const chips = ['malbec','cabernet','pinot','syrah','chardonnay','sauvignon','riesling','champagne'].map(id=>
+    `<button class="chip" role="radio" aria-checked="${S.homeCepa===id}" data-homecepa="${id}">${esc(C(id).short)}</button>`).join('');
+  let body;
+  if(S.ui==='carga') body = skCards(3);
+  else if(S.ui==='error') body = errBox('las copas');
+  else if(S.ui==='vacio') body = emptyBox(`Aún no hay copas para ${esc(C(S.homeCepa).short)}`, 'Mientras tanto, revisa la guía y encuentra la copa que mejor acompaña tu vino.', `<button class="btn btn-primary" data-go="p2">Ver todas las copas</button>`);
+  else {
+    const sel = COPAS.find(c=>c.cepa===S.homeCepa);
+    const rest = COPAS.filter(c=>c.cepa!==S.homeCepa).slice(0,3);
+    body = `<div class="hscroll" role="list" aria-label="Copas para ${esc(C(S.homeCepa).name)} y otras cepas">${[sel,...rest].map((c,i)=>`<div role="listitem" style="display:flex">${copaCard(c,i)}</div>`).join('')}</div>`;
+  }
+  return `<section class="section" aria-labelledby="h-copas" id="sec-copas">
+    <div class="sec-head"><h2 class="sec-title" id="h-copas">Copas Riedel por cepa</h2><button class="link-btn" data-go="p2">Ver todo ${ic('chev')}</button></div>
+    <p class="sec-sub">Elige tu vino y te mostramos su copa ideal.</p>
+    <div class="chip-row" role="radiogroup" aria-label="Filtrar copas por cepa">${chips}</div>
+    ${body}</section>`;
+}
+const QA = [
+  {l:'Guía de copas', i:'glass', go:'p2', hl:true}, {l:'Colecciones de copas', i:'grid', go:'p3'}, {l:'Ofertas del día', i:'tag', go:'p4'},
+  {l:'Nuestra cava', i:'barrel', go:'ext'}, {l:'Boxes', i:'box', go:'ext'}, {l:'Accesorios', i:'acc', go:'ext'},
+  {l:'Membresías de regalo', i:'gift', go:'ext'}, {l:'Eventos', i:'calendar', go:'ext'}
+];
+function screenP1(){
+  appbar('home');
+  const slides = [
+    `<div class="slide slide-copas on-dark" role="group" aria-roledescription="diapositiva" aria-label="1 de 2: Copas Riedel">
+      <div class="copy"><span class="eyebrow">Copas Riedel</span><h2>Descubre la copa ideal para tu vino</h2><p>Una copa pensada para cada cepa.</p>
+      <button class="btn btn-cream btn-sm" data-go="p2">Ver guía de copas</button></div>
+      <div class="art" role="img" aria-label="Siluetas de tres copas Riedel de distinta forma: para Pinot Noir, Cabernet y Chardonnay">${glassSVG('pinot',{k:9})}${glassSVG('cabernet',{k:9})}${glassSVG('chardonnay',{k:9})}</div></div>`,
+    `<div class="slide slide-new on-dark" role="group" aria-roledescription="diapositiva" aria-label="2 de 2: New Arrivals">
+      <div class="copy"><span class="eyebrow">New Arrivals</span><h2>Lo nuevo de nuestra cava</h2><p>Etiquetas recién llegadas, elegidas por nuestros sommeliers.</p>
+      <button class="btn btn-cream btn-sm" data-go="ext">Ver novedades</button></div>
+      <div class="art" role="img" aria-label="Foto: tres botellas de vino sobre una mesa de madera">${bottleSVG('malbec')}${bottleSVG('chardonnay')}${bottleSVG('pinot')}</div></div>`
+  ];
+  return `<h1 class="sr-only" tabindex="-1" id="h1">Inicio</h1>
+  <section class="hero" aria-roledescription="carrusel" aria-label="Destacados">
+    <div class="slides">${slides.map((s,i)=>s.replace('class="slide', `style="transform:translateX(-${S.slide*100}%)" ${i!==S.slide?'aria-hidden="true" inert':''} class="slide`)).join('')}</div>
+    <div class="dots" id="dots">${[0,1].map(i=>`<button aria-label="Ver diapositiva ${i+1}" aria-current="${S.slide===i}" data-slide="${i}"><span></span></button>`).join('')}</div>
+  </section>
+  <section class="section" style="padding-top:var(--spacing-s)" aria-labelledby="h-qa">
+    <h2 class="sr-only" id="h-qa">Accesos rápidos</h2>
+    <div class="quick">${QA.map(q=>`<button class="qa${q.hl?' hl':''}" data-go="${q.go}">${ic(q.i)}${q.l}</button>`).join('')}</div>
+  </section>
+  ${sectionCopasHome()}
+  <section class="club on-dark" aria-labelledby="h-club"><h2 class="sr-only" id="h-club">Club de socios</h2>
+    <div class="club-card"><p>Únete al <b>CLUB DE VINOS</b> más <b>EXCLUSIVO</b> del país.</p><button class="btn btn-primary btn-sm" style="background:var(--color-primary-500)" data-go="club">Ver planes</button></div></section>
+  <section class="section" aria-labelledby="h-reg">
+    <div class="sec-head"><h2 class="sec-title" id="h-reg">Regiones</h2><button class="link-btn" data-go="ext">Ver más ${ic('chev')}</button></div>
+    <div class="regions">
+      <button class="region" data-go="ext"><span class="flag" role="img" aria-label="Bandera de Australia" style="background:linear-gradient(var(--color-info-800),var(--color-info-800))"></span>Australia</button>
+      <button class="region" data-go="ext"><span class="flag" role="img" aria-label="Bandera de Italia" style="background:linear-gradient(90deg,var(--color-sucess-700) 33%,#fff 33% 66%,var(--color-error-600) 66%)"></span>Italia</button>
+      <button class="region" data-go="ext"><span class="flag" role="img" aria-label="Bandera de España" style="background:linear-gradient(var(--color-error-600) 25%,var(--color-warning-500,#ffbe2e) 25% 75%,var(--color-error-600) 75%)"></span>España</button>
+    </div></section>
+  <section class="exclusive on-dark" aria-labelledby="h-ex">
+    <div class="sec-head"><h2 class="sec-title" id="h-ex">Contenido exclusivo</h2><button class="link-btn" data-go="club">Ir al club ${ic('chev')}</button></div>
+    <p>Aprende sobre el fascinante mundo del vino con nosotros.</p>
+    <div class="grid2">
+      <div class="media-card" role="group" aria-label="Wine School">WINE SCHOOL<button class="btn btn-primary btn-sm" data-go="ext">Explorar cursos</button></div>
+      <div class="media-card" role="group" aria-label="Vinutos">VINUTOS<button class="btn btn-primary btn-sm" data-go="ext">Explorar vinutos</button></div>
+    </div></section>
+  <section class="section" aria-labelledby="h-news">
+    <div class="sec-head"><h2 class="sec-title" id="h-news">Sorvo News</h2><button class="link-btn" data-go="ext">Ver más ${ic('chev')}</button></div>
+    <div class="news">${[1,2,3].map(n=>`<article><div class="ph photo" role="img" aria-label="Foto de la nota ${n}">Foto</div><div><small>Vinos</small><h3>[Título de la nota ${n}]</h3><button class="link-btn" style="padding:0" data-go="ext">Leer más</button></div></article>`).join('')}</div>
+  </section><div class="foot-space"></div>`;
+}
+
+function screenP2(){
+  appbar('dark','Guía de copas');
+  let list;
+  if(S.ui==='carga') list = skRows(6);
+  else if(S.ui==='error') list = errBox('la guía de copas');
+  else if(S.ui==='vacio') list = emptyBox('La guía aún no tiene copas', 'Estamos preparando las recomendaciones. Mientras tanto, revisa nuestras colecciones.', `<button class="btn btn-primary" data-go="p3">Ver colecciones de copas</button>`);
+  else list = ['Tintos','Blancos','Espumantes'].map(f=>`<h2 class="group-label">${f}</h2><ul class="list">${CEPAS.filter(c=>c.fam===f).map(c=>`<li><button class="row" data-go="p5" data-cepa="${c.id}">${glassSVG(c.id,{k:2})}<span class="rtext"><b>${esc(c.name)}</b><span>[Modelo Riedel] · ${c.out?'Agotada':'[Precio USD]'}</span></span>${ic('chev')}</button></li>`).join('')}</ul>`).join('');
+  return `<div class="guide-hero on-dark"><h1 tabindex="-1" id="h1">Encuentra la copa perfecta</h1><p>Elige una cepa y descubre la copa diseñada para potenciar sus aromas y sabores.</p>
+    <button class="fake-search" data-go="p7">${ic('search')}Ej. Pinot Noir, Malbec…</button></div>${list}<div class="foot-space"></div>`;
+}
+
+function screenP3(){
+  appbar('dark','Colecciones de copas');
+  let body;
+  if(S.ui==='carga') body = skRows(4);
+  else if(S.ui==='error') body = errBox('las colecciones');
+  else if(S.ui==='vacio') body = emptyBox('Aún no hay colecciones disponibles','Mientras tanto, encuentra tu copa por cepa en la guía.',`<button class="btn btn-primary" data-go="p2">Abrir guía de copas</button>`);
+  else body = [['A',['cabernet','pinot','chardonnay']],['B',['malbec','syrah','sauvignon']],['C',['riesling','champagne','pinot']],['D',['cabernet','chardonnay','champagne']]].map(([k,cs],i)=>
+    `<button class="coll" data-go="p8" data-cat="copas" data-q="">
+      <span class="art" role="img" aria-label="Siluetas de copas de la colección [Línea Riedel ${k}]">${cs.map((c,j)=>glassSVG(c,{k:30+i*3+j})).join('')}</span>
+      <span class="rtext"><b>[Línea Riedel ${k}]</b><span>[N] copas · para ${cs.map(c=>C(c).short).join(', ')}</span><span>Desde [Precio USD]</span></span>${ic('chev')}</button>`).join('');
+  return `<div class="section"><h1 class="sec-title" tabindex="-1" id="h1">Colecciones de copas</h1><p class="sec-sub" style="margin-top:var(--spacing-s)">Líneas Riedel elegidas para acompañar cada vino de tu cava.</p>${body}</div><div class="foot-space"></div>`;
+}
+
+function screenP4(){
+  appbar('dark','Ofertas del día');
+  let body;
+  const items = [COPAS[1], WINES[2], COPAS[4], COPAS[2]];
+  if(S.ui==='carga') body = `<div class="grid2">${skCards(1)}${skCards(1)}</div>`;
+  else if(S.ui==='error') body = errBox('las ofertas del día');
+  else if(S.ui==='vacio') body = emptyBox('Hoy no hay ofertas activas','Vuelve mañana o descubre las copas ideales para tus vinos.',`<button class="btn btn-primary" data-go="p3">Ver colecciones de copas</button>`);
+  else body = `<div class="grid2">${items.map((it,i)=>{ const isCopa=it.id.startsWith('copa'); const c=C(it.cepa);
+    return `<article class="pcard ${isCopa?'copa':'vino'}" aria-label="Oferta: ${esc(it.name)}">
+      <button class="pimg" data-go="${isCopa?'p5':'p6'}" data-cepa="${c.id}" data-wine="${it.id}" tabindex="-1" aria-hidden="true">${isCopa?glassSVG(c.id,{k:40+i}):bottleSVG(c.id)}<span class="tag tag-offer">-[X]%</span></button>
+      <div class="pbody">${isCopa?tagCopa():tagVino()}<button class="pname" data-go="${isCopa?'p5':'p6'}" data-cepa="${c.id}" data-wine="${it.id}">${esc(it.name)}</button>
+      <span class="price-old">[Precio USD]</span><span class="price">[Precio oferta USD]</span>
+      <button class="btn btn-primary btn-sm" data-add="${it.id}" aria-label="Agregar ${esc(it.name)} al carrito">Agregar</button></div></article>`;}).join('')}</div>`;
+  return `<h1 class="sr-only" tabindex="-1" id="h1">Ofertas del día</h1><div class="offer-timer">${ic('clock')}<span>Ofertas válidas hasta hoy a las [hh:mm]. Datos de ejemplo.</span></div><div class="section" style="padding-top:var(--spacing-l)">${body}</div><div class="foot-space"></div>`;
+}
+
+function screenP5(){
+  const c = C(S.params.cepa || 'malbec'); const copa = COPAS.find(x=>x.cepa===c.id);
+  const out = copa.out || S.ui==='sinstock';
+  appbar('dark','Ficha de copa');
+  if(S.ui==='carga'){ setCTA(''); return `<div aria-busy="true"><span class="sr-only">Cargando ficha…</span><div class="sk" style="height:248px;border-radius:0"></div><div class="pdp"><div class="sk" style="height:24px;width:40%;margin-bottom:12px"></div><div class="sk" style="height:28px;width:80%;margin-bottom:12px"></div><div class="sk" style="height:16px;width:50%;margin-bottom:24px"></div><div class="sk" style="height:80px"></div></div></div>`; }
+  if(S.ui==='error'){ setCTA(''); return errBox('la ficha de la copa'); }
+  if(S.ui==='vacio'){ setCTA(''); return emptyBox('Esta copa ya no está disponible','Puede que la hayamos retirado del catálogo. Revisa la copa para otra cepa o abre la guía.',`<button class="btn btn-primary" data-go="p2">Abrir guía de copas</button>`); }
+  const variants = ['malbec','pinot','chardonnay','cabernet','syrah','sauvignon','riesling','champagne'];
+  const wines = WINES.filter(w=>w.cepa===c.id);
+  const alts = CEPAS.filter(x=>x.id!==c.id).slice(0,4);
+  setCTA(out ? `<button class="btn" disabled>Agotada</button>` :
+    `<button class="btn btn-primary" id="cta-add" data-add="${copa.id}" data-qty>${ic('cart')}Agregar al carrito</button>`);
+  return `<div class="pdp-img">${glassSVG(c.id,{k:50, alt:`Silueta de la copa ${copa.name}, diseñada para ${c.name}`})}
+      <div class="tags">${out?'<span class="tag tag-out">Agotada</span>':tagCopa()}<span class="tag tag-cepa">Para ${esc(c.short)}</span></div></div>
+    <div class="pdp">
+      <span class="pbrand">RIEDEL · ${copa.line}</span>
+      <h1 tabindex="-1" id="h1">${esc(copa.name)}</h1>
+      <div class="meta">Set de [N] copas · Cristal${c.supuesto?' · <span class="verify">Supuesto: copa específica por confirmar</span>':''}</div>
+      <div style="margin-top:var(--spacing-m)"><span class="price" style="font-size:var(--font-size-subheader-2)">[Precio USD]</span> <span class="iva">Precio incluye IVA</span><br><span class="socios">PRECIO SOCIOS [Precio socios USD]</span></div>
+
+      <h2 id="h-var">Ver esta copa para</h2>
+      <div class="chip-row" role="radiogroup" aria-labelledby="h-var">${variants.map(v=>`<button class="chip" role="radio" aria-checked="${v===c.id}" data-variant="${v}">${esc(C(v).short)}</button>`).join('')}</div>
+
+      <h2>¿Por qué es ideal para ${esc(c.short)}?</h2>
+      <p class="why">${esc(c.why)}</p>
+
+      ${out ? `<div class="alert alert-error" role="alert" style="margin-top:var(--spacing-l)">${ic('alert')}<span><b>Esta copa está agotada por ahora.</b> Puedes elegir la copa para otra cepa o revisar nuestras colecciones.</span></div>
+        <button class="btn btn-secondary" style="margin-top:var(--spacing-s);width:100%" data-go="p3">Ver colecciones de copas</button>` :
+      `<h2 id="h-qty">Cantidad</h2>
+      <div class="stepper" id="stepper"><button data-step="-1" aria-label="Quitar una unidad">${ic('minus')}</button>
+        <input id="qty" type="number" inputmode="numeric" min="1" max="${MAXQ}" value="1" aria-labelledby="h-qty" aria-describedby="qty-msg">
+        <button data-step="1" aria-label="Agregar una unidad">${ic('plus')}</button></div>
+      <div class="field-msg" id="qty-msg">Máximo ${MAXQ} sets por pedido.</div>`}
+
+      <h2>Vinos compatibles con esta copa</h2>
+      <div class="hscroll" role="list">${wines.map(w=>`<div role="listitem" style="display:flex">${wineCard(w)}</div>`).join('')}</div>
+
+      <h2>Alternativas para otras cepas</h2>
+      <ul class="list" style="margin:0 calc(var(--spacing-l) * -1)">${alts.map((a,i)=>`<li><button class="row" data-variant="${a.id}">${glassSVG(a.id,{k:60+i})}<span class="rtext"><b>[Modelo Riedel] ${esc(a.short)}</b><span>Para ${esc(a.name)} · [Precio USD]</span></span>${ic('chev')}</button></li>`).join('')}</ul>
+    </div>`;
+}
+
+function screenP6(){
+  const w = WINES.find(x=>x.id===S.params.wine) || WINES.find(x=>x.cepa==='malbec');
+  const c = C(w.cepa); const copa = COPAS.find(x=>x.cepa===c.id);
+  appbar('dark','Ficha de vino');
+  if(S.ui==='carga'){ setCTA(''); return `<div aria-busy="true"><span class="sr-only">Cargando ficha…</span><div class="sk" style="height:248px;border-radius:0"></div><div class="pdp"><div class="sk" style="height:28px;width:80%;margin-bottom:12px"></div><div class="sk" style="height:110px;margin-top:24px"></div></div></div>`; }
+  if(S.ui==='error'){ setCTA(''); return errBox('la ficha del vino'); }
+  setCTA(`<button class="btn btn-secondary" data-add="${w.id}+${copa.id}" ${copa.out?'disabled':''}>Vino + copa</button><button class="btn btn-primary" data-add="${w.id}">${ic('cart')}Agregar vino</button>`);
+  const recoOut = copa.out || S.ui==='sinstock';
+  const reco = S.ui==='vacio'
+    ? `<div class="alert alert-info">${ic('glass')}<span>Aún no tenemos una copa recomendada para este vino. <button class="link-btn" style="min-height:44px" data-go="p2">Abrir guía de copas</button></span></div>`
+    : `<section class="reco" aria-labelledby="h-reco">${glassSVG(c.id,{k:70, alt:`Silueta de la copa recomendada para ${c.name}`})}
+        <div class="rtext"><span class="tag tag-copa" style="align-self:flex-start">${ic('glass')}Copa recomendada</span>
+          <b id="h-reco">${esc(copa.name)}</b><span class="pfor">Diseñada para ${esc(c.name)}</span><span class="price">${recoOut?'Agotada':'[Precio USD]'}</span>
+          <div class="actions"><button class="btn btn-secondary btn-sm" data-go="p5" data-cepa="${c.id}">Ver copa</button>${recoOut?'':`<button class="btn btn-primary btn-sm" data-add="${copa.id}" aria-label="Agregar copa ${esc(copa.name)} al carrito">Agregar copa</button>`}</div></div></section>`;
+  return `<div class="pdp-img vino">${bottleSVG(c.id, `Foto: botella de ${w.name}`)}<div class="tags">${tagVino()}<span class="tag tag-cepa">${esc(c.short)}</span></div></div>
+    <div class="pdp"><span class="pbrand">${w.origin}</span><h1 tabindex="-1" id="h1">${esc(w.name)}</h1><div class="meta">${esc(c.name)} · [Añada] · 750 ml</div>
+      <div style="margin:var(--spacing-m) 0 var(--spacing-l)"><span class="price" style="font-size:var(--font-size-subheader-2)">[Precio USD]</span> <span class="iva">Precio incluye IVA</span><br><span class="socios">PRECIO SOCIOS [Precio socios USD]</span></div>
+      ${reco}
+      <h2>Sobre este vino</h2><p>[Descripción del vino: notas de cata, crianza y servicio.]</p>
+    </div>`;
+}
+
+/* ---------- Buscador ---------- */
+const norm = s => s.normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().trim();
+function matchCepas(q){ const n = norm(q); if(n.length<2) return []; return CEPAS.filter(c=> norm(c.name).includes(n) || ALIASES[c.id].some(a=>a.startsWith(n) || n.includes(a))); }
+function hl(text, q){ const n=norm(q); const t=norm(text); const i=t.indexOf(n); if(i<0||!n) return esc(text); return esc(text.slice(0,i))+'<mark>'+esc(text.slice(i,i+n.length))+'</mark>'+esc(text.slice(i+n.length)); }
+function screenP7(){ appbar('search'); setTimeout(()=>{ const q=document.getElementById('q'); q&&q.focus(); },0); return `<h1 class="sr-only" tabindex="-1" id="h1">Buscador</h1><div id="sugg" aria-live="polite"></div><p id="q-help" class="sr-only">Escribe una cepa, un vino o una copa. Las sugerencias aparecen debajo.</p>`; }
+function renderSuggestions(){
+  const box = document.getElementById('sugg'); if(!box) return;
+  if(S.ui==='carga'){ box.innerHTML = skRows(5); return; }
+  if(S.ui==='error'){ box.innerHTML = errBox('las sugerencias','Revisa tu conexión y vuelve a intentarlo. Tu búsqueda se mantiene.'); return; }
+  const q = S.q;
+  if(norm(q).length<2){
+    box.innerHTML = `${norm(q).length===1?`<div class="field-msg" style="padding:var(--spacing-m) var(--spacing-l) 0">Escribe al menos 2 letras para ver sugerencias.</div>`:''}
+    <h2 class="group-label">Cepas populares</h2><ul class="list">${['malbec','cabernet','pinot','chardonnay','syrah'].map(id=>`<li><button class="sugg" data-pick="${C(id).short}">${ic('search')}<span class="rtext"><b>${esc(C(id).name)}</b><span>Vinos y copas</span></span></button></li>`).join('')}</ul>`;
+    return;
+  }
+  const cs = S.ui==='vacio' ? [] : matchCepas(q);
+  if(!cs.length){ box.innerHTML = `<div class="state-box state-empty" style="margin-top:var(--spacing-l)"><div class="ico">${ic('search')}</div><h3>Sin sugerencias para «${esc(q)}»</h3><p>Presiona Buscar para ver alternativas o prueba con una cepa como Malbec.</p><button class="btn btn-primary" data-submit>Buscar «${esc(q)}»</button></div>`; return; }
+  const wines = WINES.filter(w=>cs.some(c=>c.id===w.cepa)).slice(0,3);
+  const copas = COPAS.filter(x=>cs.some(c=>c.id===x.cepa)).slice(0,3);
+  box.innerHTML = `
+    <h2 class="group-label">${ic('search')}Cepa</h2>
+    <ul class="list">${cs.slice(0,2).map(c=>`<li><button class="sugg" data-go="p8" data-q="${c.short}" data-cepa="${c.id}"><span class="thumb cepa">${ic('search')}</span><span class="rtext"><b>${hl(c.name,q)}</b><span>Ver todos los vinos y copas</span></span></button></li>`).join('')}</ul>
+    <h2 class="group-label">${ic('bottle')}Vinos</h2>
+    <ul class="list">${wines.map(w=>`<li><button class="sugg" data-go="p6" data-wine="${w.id}"><span class="thumb vino">${bottleSVG(w.cepa)}</span><span class="rtext"><b>${hl(w.name,q)}</b><span>${esc(C(w.cepa).name)} · [Precio USD]</span></span>${tagVino()}</button></li>`).join('')}</ul>
+    <h2 class="group-label">${ic('glass')}Copas Riedel</h2>
+    <ul class="list">${copas.map((x,i)=>`<li><button class="sugg" data-go="p5" data-cepa="${x.cepa}"><span class="thumb copa">${glassSVG(x.cepa,{k:80+i})}</span><span class="rtext"><b>${hl(x.name,q)}</b><span>Para ${esc(C(x.cepa).name)} · ${x.out?'Agotada':'[Precio USD]'}</span></span>${tagCopa()}</button></li>`).join('')}</ul>
+    <div style="padding:var(--spacing-l)"><button class="btn btn-secondary" style="width:100%" data-go="p8" data-q="${esc(q)}" data-cepa="${cs[0].id}">Ver todos los resultados para «${esc(q)}»</button></div>`;
+}
+function submitSearch(){
+  const q = S.q; if(norm(q).length<2){ S.q=q; renderSuggestions(); return; }
+  const cs = matchCepas(q);
+  if(cs.length) go('p8',{q, cepa:cs[0].id, cat:'todo'}); else go('p9',{q});
+}
+
+function screenP8(){
+  const p = S.params; const cepa = p.cepa || null; const cat = p.cat || 'todo';
+  S.q = p.q || (cepa ? C(cepa).short : '');
+  appbar('search');
+  const wines = WINES.filter(w=>!cepa || w.cepa===cepa), copas = COPAS.filter(x=>!cepa || x.cepa===cepa);
+  const nW = wines.length, nC = copas.length;
+  const filters = `<div class="filters">
+    <div class="flabel" id="f-cat">Categoría</div>
+    <div class="segmented" role="radiogroup" aria-labelledby="f-cat">
+      <button role="radio" aria-checked="${cat==='todo'}" data-cat="todo">Todo (${nW+nC})</button>
+      <button role="radio" aria-checked="${cat==='vinos'}" data-cat="vinos">${ic('bottle')}Vinos (${nW})</button>
+      <button role="radio" aria-checked="${cat==='copas'}" data-cat="copas">${ic('glass')}Copas (${nC})</button></div>
+    <div class="flabel" id="f-cepa">Tipo de vino</div>
+    <div class="chip-row" role="radiogroup" aria-labelledby="f-cepa"><button class="chip" role="radio" aria-checked="${!cepa}" data-fcepa="">Todos</button>${CEPAS.map(c=>`<button class="chip" role="radio" aria-checked="${cepa===c.id}" data-fcepa="${c.id}">${esc(c.short)}</button>`).join('')}</div></div>`;
+  let body;
+  if(S.ui==='carga') body = `<div style="padding:0 var(--spacing-l)">${skCards(2)}</div>`;
+  else if(S.ui==='error') body = errBox('los resultados','Revisa tu conexión y vuelve a intentarlo. Tus filtros se mantienen.');
+  else if(S.ui==='vacio') body = noResults(S.q || 'tu búsqueda', true);
+  else {
+    const showC = cat!=='vinos', showW = cat!=='copas';
+    const total = (showC?nC:0)+(showW?nW:0);
+    body = `<div class="result-count" aria-live="polite">${total} resultados${cepa?` para ${esc(C(cepa).name)}`:''}</div>
+      ${showC?`<h2 class="group-label">${ic('glass')}Copas Riedel (${nC})</h2><div class="section" style="padding-top:var(--spacing-xs)"><div class="grid2">${copas.map((x,i)=>copaCard(x,90+i)).join('')}</div></div>`:''}
+      ${showW?`<h2 class="group-label" style="margin-top:var(--spacing-l)">${ic('bottle')}Vinos (${nW})</h2><div class="section" style="padding-top:var(--spacing-xs)"><div class="grid2">${wines.map(wineCard).join('')}</div></div>`:''}`;
+  }
+  return `<h1 class="sr-only" tabindex="-1" id="h1">Resultados de búsqueda</h1>${filters}${body}<div class="foot-space"></div>`;
+}
+function noResults(q, inline){
+  return `<div class="state-box state-empty" style="margin-top:var(--spacing-xl)"><div class="ico">${ic('search')}</div>
+    <${inline?'h2':'h1 tabindex="-1" id="h1"'}>No encontramos resultados para «${esc(q)}»</${inline?'h2':'h1'}>
+    <p>Revisa la ortografía o busca por cepa. También puedes ver nuestras copas por colección.</p>
+    <div class="actions"><button class="btn btn-primary" data-go="p3">Ver colecciones de copas</button><button class="btn btn-secondary" data-go="p2">Abrir guía de copas</button></div></div>
+    <h2 class="group-label">Busca por cepa</h2>
+    <div class="chip-row" style="margin:0;padding:var(--spacing-xs) var(--spacing-l)">${['malbec','cabernet','pinot','chardonnay','champagne'].map(id=>`<button class="chip" data-go="p8" data-q="${C(id).short}" data-cepa="${id}">${esc(C(id).short)}</button>`).join('')}</div>`;
+}
+function screenP9(){ S.q = S.params.q || 'Tannat ahumado'; appbar('search'); return noResults(S.q,false); }
+
+function screenExt(){ appbar('dark', S.params.title || 'Sección'); return `<div class="state-box state-empty"><div class="ico">${ic('grid')}</div><h1 tabindex="-1" id="h1" style="font-size:var(--font-size-body-2);margin:0">${esc(S.params.title||'Sección existente')}</h1><p>Esta pantalla ya existe en la app y no cambia en esta HU.</p><button class="btn btn-primary" data-back>Volver</button></div>`; }
+
+/* ================== RENDER / NAVEGACIÓN ================== */
+const RENDER = {p1:screenP1,p2:screenP2,p3:screenP3,p4:screenP4,p5:screenP5,p6:screenP6,p7:screenP7,p8:screenP8,p9:screenP9,ext:screenExt};
+function setCTA(html){ const b=document.getElementById('ctabar'); b.innerHTML=html; b.hidden=!html; }
+function render(focus=true){
+  const s = S.screen;
+  setCTA('');
+  document.getElementById('promobar').hidden = s!=='p1';
+  vp.innerHTML = RENDER[s]();
+  const fiche = (s==='p5'||s==='p6') && !document.getElementById('ctabar').hidden;
+  document.getElementById('bottomnav').hidden = fiche;
+  if(s==='p7') renderSuggestions();
+  const navMap = {p1:'p1',p3:'tienda',p4:'tienda',p8:'tienda',p2:'tienda',p5:'tienda',p6:'tienda'};
+  document.querySelectorAll('[data-nav]').forEach(b=>b.setAttribute('aria-current', navMap[s]===b.dataset.nav || (s==='ext'&&S.params.nav===b.dataset.nav) ? 'page':'false'));
+  document.querySelectorAll('#jump button').forEach(b=>b.setAttribute('aria-current', b.dataset.jump===s));
+  if(focus && s!=='p7'){ vp.scrollTop=0; const h=document.getElementById('h1'); h && h.focus({preventScroll:true}); }
+  if(s==='p1') measureHome();
+}
+function go(screen, params={}){
+  if(screen==='cart'){ toast(`Tienes ${S.cart} ${S.cart===1?'producto':'productos'} en tu carrito.`, false); return; }
+  if(screen==='ext'||screen==='club'||screen==='perfil'||screen==='tienda'&&false){}
+  S.stack.push({screen:S.screen, params:S.params, scroll:vp.scrollTop});
+  S.screen = (screen==='club'||screen==='perfil') ? 'ext' : screen;
+  S.params = screen==='club' ? {title:'Club', nav:'club'} : screen==='perfil' ? {title:'Perfil', nav:'perfil'} : params;
+  if(screen==='p7') S.q='';
+  render();
+}
+function back(){ const prev = S.stack.pop(); if(!prev){ S.screen='p1'; S.params={}; render(); return; } S.screen=prev.screen; S.params=prev.params; render(); vp.scrollTop=prev.scroll||0; }
+
+function addToCart(ids){
+  const n = String(ids).split('+').length;
+  let qty = 1;
+  const qEl = document.getElementById('qty');
+  if(qEl && document.getElementById('cta-add') && ids===document.getElementById('cta-add').dataset.add){
+    if(!validateQty()) { qEl.focus(); return; }
+    qty = parseInt(qEl.value,10);
+  }
+  S.cart += n*qty;
+  appbar(S.screen==='p1'?'home':(['p7','p8','p9'].includes(S.screen)?'search':'dark'), document.querySelector('.appbar .title')?.textContent || '');
+  toast('Agregado a tu carrito', true);
+}
+function toast(msg, withLink){
+  const t = document.getElementById('toast');
+  t.innerHTML = `${ic('check')}<span>${msg}</span>${withLink?`<button class="link-btn" data-go="cart">Ver carrito</button>`:''}`;
+  t.classList.add('show'); clearTimeout(S.toastT); S.toastT = setTimeout(()=>t.classList.remove('show'), 4000);
+}
+function validateQty(){
+  const el = document.getElementById('qty'), msg = document.getElementById('qty-msg'), st = document.getElementById('stepper'), cta=document.getElementById('cta-add');
+  if(!el) return true;
+  const v = Number(el.value); const ok = Number.isInteger(v) && v>=1 && v<=MAXQ;
+  st.classList.toggle('invalid', !ok); el.setAttribute('aria-invalid', String(!ok));
+  msg.className = 'field-msg' + (ok?'':' err');
+  msg.innerHTML = ok ? `Máximo ${MAXQ} sets por pedido.` : `${ic('alert')}<span>${v>MAXQ?`Puedes agregar hasta ${MAXQ} sets por pedido. Ajusta la cantidad para continuar.`:'Ingresa una cantidad de al menos 1 set para continuar.'}</span>`;
+  if(cta){ cta.setAttribute('aria-disabled', String(!ok)); }
+  return ok;
+}
+
+/* ================== EVENTOS ================== */
+document.addEventListener('click', e=>{
+  const t = e.target.closest('button'); if(!t) return;
+  if(t.closest('.docs')) return;
+  if(t.dataset.state){ S.ui=t.dataset.state; document.querySelectorAll('[data-state]').forEach(b=>b.setAttribute('aria-pressed', b===t)); render(false); if(S.ui==='exito'){ S.cart++; render(false); toast('Agregado a tu carrito', true); } return; }
+  if(t.dataset.width){ S.width=+t.dataset.width; document.getElementById('device').classList.toggle('w430', S.width===430); document.querySelectorAll('[data-width]').forEach(b=>b.setAttribute('aria-pressed', b===t)); if(S.screen==='p1') measureHome(); return; }
+  if(t.dataset.jump){ S.stack=[]; S.screen=t.dataset.jump; S.params = t.dataset.jump==='p8'?{q:'Malbec',cepa:'malbec',cat:'todo'}: t.dataset.jump==='p9'?{q:'Tannat ahumado'}: t.dataset.jump==='p5'?{cepa:'malbec'}:{}; if(t.dataset.jump==='p7') S.q='Malbec'; render(); return; }
+  if(t.hasAttribute('data-back')){ back(); return; }
+  if(t.hasAttribute('data-retry')){ S.ui='normal'; document.querySelectorAll('[data-state]').forEach(b=>b.setAttribute('aria-pressed', b.dataset.state==='normal')); render(); return; }
+  if(t.hasAttribute('data-clear')){ S.q=''; appbar('search'); document.getElementById('q').focus(); renderSuggestions(); return; }
+  if(t.hasAttribute('data-submit')){ submitSearch(); return; }
+  if(t.dataset.pick){ S.q=t.dataset.pick; appbar('search'); renderSuggestions(); document.getElementById('q').focus(); return; }
+  if(t.dataset.nav){ const n=t.dataset.nav; if(n==='p1'){ S.stack=[]; S.screen='p1'; S.params={}; render(); } else if(n==='tienda'){ go('p8',{q:'',cepa:null,cat:'todo'}); } else go(n); return; }
+  if(t.dataset.slide){ S.slide=+t.dataset.slide; render(false); document.querySelector(`[data-slide="${S.slide}"]`).focus(); return; }
+  if(t.dataset.homecepa){ S.homeCepa=t.dataset.homecepa; const st=vp.scrollTop; render(false); vp.scrollTop=st; document.querySelector(`[data-homecepa="${S.homeCepa}"]`).focus(); return; }
+  if(t.dataset.variant){ S.params={cepa:t.dataset.variant}; const st = t.classList.contains('chip'); render(!st); if(st) document.querySelector(`.chip[data-variant="${S.params.cepa}"]`)?.focus(); return; }
+  if(t.dataset.cat && S.screen==='p8'){ S.params={...S.params, cat:t.dataset.cat}; render(false); document.querySelector(`.segmented [data-cat="${t.dataset.cat}"]`).focus(); return; }
+  if(t.dataset.fcepa!==undefined){ S.params={...S.params, cepa:t.dataset.fcepa||null, q:t.dataset.fcepa?C(t.dataset.fcepa).short:''}; render(false); document.querySelector(`[data-fcepa="${t.dataset.fcepa}"]`).focus(); return; }
+  if(t.dataset.step){ const el=document.getElementById('qty'); el.value = Math.max(0, (parseInt(el.value,10)||0) + (+t.dataset.step)); validateQty(); return; }
+  if(t.dataset.add){ if(t.getAttribute('aria-disabled')==='true'){ validateQty(); document.getElementById('qty').focus(); return; } addToCart(t.dataset.add); return; }
+  if(t.dataset.go){
+    const g=t.dataset.go;
+    if(g==='ext'){ go('ext',{title:t.textContent.trim().replace(/\s+/g,' ')}); return; }
+    const params = {}; if(t.dataset.cepa) params.cepa=t.dataset.cepa; if(t.dataset.wine) params.wine=t.dataset.wine;
+    if(t.dataset.q!==undefined) params.q=t.dataset.q; if(t.dataset.cat) params.cat=t.dataset.cat;
+    if(g==='p6' && t.dataset.wine && !t.dataset.wine.startsWith('vino')) delete params.wine;
+    go(g, params);
+  }
+});
+vp.addEventListener('change', e=>{ if(e.target.id==='qty') validateQty(); });
+vp.addEventListener('focusout', e=>{ if(e.target.id==='qty') validateQty(); });
+/* Flechas en carrusel y radiogroups */
+document.addEventListener('keydown', e=>{
+  if(!['ArrowLeft','ArrowRight'].includes(e.key)) return;
+  const grp = e.target.closest('[role="radiogroup"], #dots'); if(!grp) return;
+  const items = [...grp.querySelectorAll('button')]; const i = items.indexOf(e.target); if(i<0) return;
+  e.preventDefault(); const n = items[(i + (e.key==='ArrowRight'?1:-1) + items.length) % items.length]; n.focus(); n.click();
+});
+document.addEventListener('keydown', e=>{ if(e.key==='Escape' && S.screen!=='p1' && !e.target.closest('.docs')) back(); });
+
+/* Saltos de pantalla */
+
+
+/* Medición CA-06 */
+function measureHome(){ /* medición de la documentación: no aplica en la versión independiente */ }
+render(false);
+</script>
+</body>
+</html>
